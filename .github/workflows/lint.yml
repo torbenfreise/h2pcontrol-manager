@@ -22,4 +22,4 @@ jobs:
           GOPRIVATE: buf.build
         with:
           version: v2.5
-          args: --enable gofmt,govet,staticcheck
+          args: --enable govet,staticcheck --enable-fmt gofmt
