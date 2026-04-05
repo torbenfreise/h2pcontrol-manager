@@ -1,9 +1,5 @@
-buf.build/gen/go/beyer-labs/h2pcontrol/grpc/go v1.6.1-20260405152613-38b367a33387.1 h1:DtM79F0fjNv7jK2VJqEaMzOLRBUgeKWe3TjNxdH+VRM=
-buf.build/gen/go/beyer-labs/h2pcontrol/grpc/go v1.6.1-20260405152613-38b367a33387.1/go.mod h1:VQjgC14jXPz3PkMYRWo9F9USzgvIPwNGB9RkabtFidA=
 buf.build/gen/go/beyer-labs/h2pcontrol/grpc/go v1.6.1-20260405222827-ce9a930e800e.1 h1:qZHu6Wtao2fYzFEjuOiCnUcA6RX9Y93OeZsA0FGCHds=
 buf.build/gen/go/beyer-labs/h2pcontrol/grpc/go v1.6.1-20260405222827-ce9a930e800e.1/go.mod h1:NztkPiRHZyIXXhaLe/br72nZe/c7EjSD8rovQAsEaBM=
-buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go v1.36.11-20260405152613-38b367a33387.1 h1:rNsiUl1Bu2o3DJQaWjkQF0mKhlZ+WXFZEn9W+oe21nU=
-buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go v1.36.11-20260405152613-38b367a33387.1/go.mod h1:3x9DjYiY9Tax4jglFEAMTXFaGwG51SZzdOWoCTejzqA=
 buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go v1.36.11-20260405222827-ce9a930e800e.1 h1:+GvHkN3EzoTReuhJp8QMJmjs94Y2IP+Xy+JKl0AQAhc=
 buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go v1.36.11-20260405222827-ce9a930e800e.1/go.mod h1:3x9DjYiY9Tax4jglFEAMTXFaGwG51SZzdOWoCTejzqA=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
