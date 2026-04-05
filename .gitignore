@@ -1,0 +1,10 @@
+# Compiled binaries
+h2pcontrol_manager
+h2pcontrol.manager
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
