@@ -151,7 +151,7 @@ func compileProtoHandler(in *managerv1.GetStubRequest, proto_path string) (strin
 
 		return tmpDir, nil
 	} else {
-		return "", fmt.Errorf("Currently only python is supported")
+		return "", fmt.Errorf("currently only python is supported")
 	}
 
 }
