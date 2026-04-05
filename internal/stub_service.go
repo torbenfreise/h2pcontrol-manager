@@ -11,7 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	pb "h2pcontrol.manager/pb"
+	managerv1 "buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go/h2pcontrol/manager/v1"
 )
 
 type StubService struct {
@@ -21,7 +21,7 @@ func NewStubService() *StubService {
 	return &StubService{}
 }
 
-func (r *StubService) GetStub(_ context.Context, in *pb.StubRequest) (*pb.StubResponse, error) {
+func (r *StubService) GetStub(_ context.Context, in *managerv1.GetStubRequest) (*managerv1.GetStubResponse, error) {
 	log.Printf("Received call for service: '%v %v' for '%v'", in.GetServerName(), in.GetVersion(), in.GetLanguage())
 
 	proto_path := filepath.Join("proto", in.GetServerName(), in.GetVersion())
@@ -40,7 +40,7 @@ func (r *StubService) GetStub(_ context.Context, in *pb.StubRequest) (*pb.StubRe
 
 	os.WriteFile("test_zip.zip", buf, 0644)
 
-	return &pb.StubResponse{
+	return &managerv1.GetStubResponse{
 		ZipData: buf,
 		Name:    filepath.Base(dirPath),
 	}, nil
@@ -116,7 +116,7 @@ func createZip(sourceDir string) ([]byte, error) {
 	return zipContent, nil
 }
 
-func compileProtoHandler(in *pb.StubRequest, proto_path string) (string, error) {
+func compileProtoHandler(in *managerv1.GetStubRequest, proto_path string) (string, error) {
 	tmpDir, err := os.MkdirTemp("", "h2pcontrol-")
 	if err != nil {
 		log.Fatal("Error creating temp dir:", err)

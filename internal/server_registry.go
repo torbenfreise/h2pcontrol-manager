@@ -10,13 +10,13 @@ import (
 	"sync"
 	"time"
 
+	managerv1 "buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go/h2pcontrol/manager/v1"
 	"h2pcontrol.manager/helper"
-	pb "h2pcontrol.manager/pb"
 )
 
 type ServerEntry struct {
 	LastSeen  time.Time
-	Metadata  *pb.ServerDefinition
+	Metadata  *managerv1.ServerDefinition
 	Heartbeat chan struct{}
 }
 
@@ -31,15 +31,15 @@ func NewServerRegistry() *ServerRegistry {
 	}
 }
 
-func (r *ServerRegistry) RegisterServer(ctx context.Context, in *pb.RegisterRequest, addr string) (*pb.RegisterResponse, error) {
+func (r *ServerRegistry) RegisterServer(ctx context.Context, in *managerv1.RegisterServerRequest, addr string) (*managerv1.RegisterServerResponse, error) {
 
-	_, port, err := net.SplitHostPort(addr)
+	ip, port, err := net.SplitHostPort(addr)
 	if err != nil {
 		return nil, fmt.Errorf("invalid address format: %v", err)
 	}
 
-	// Create new address with server's IP and original port
-	newAddr := net.JoinHostPort(in.Server.Ip, port)
+	// Create new address with peer's IP and original port
+	newAddr := net.JoinHostPort(ip, port)
 
 	entry := &ServerEntry{
 		LastSeen:  time.Now(),
@@ -56,20 +56,20 @@ func (r *ServerRegistry) RegisterServer(ctx context.Context, in *pb.RegisterRequ
 	log.Printf("Server connected: '%v' running '%v.%v'", newAddr, in.Server.GetServerName(), in.Server.GetVersion())
 	SaveProtoFiles(in)
 
-	return &pb.RegisterResponse{
+	return &managerv1.RegisterServerResponse{
 		Result: "Server registered successfully",
 	}, nil
 }
 
-func (r *ServerRegistry) FetchServers(ctx context.Context, req *pb.Empty) (*pb.FetchServersResponse, error) {
+func (r *ServerRegistry) FetchServers(ctx context.Context, req *managerv1.FetchServersRequest) (*managerv1.FetchServersResponse, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	var serverList []*pb.FetchServerDefinition
+	var serverList []*managerv1.FetchServerDefinition
 	for addr, svc := range r.servers {
 		// The port in addr is the port of the h2pcontrol server process, not of the running server
 		ip, _ := helper.SplitAddr(addr)
-		server := pb.FetchServerDefinition{
+		server := managerv1.FetchServerDefinition{
 			Name:        svc.Metadata.GetServerName(),
 			Description: svc.Metadata.GetServerName(),
 			Addr:        ip + ":" + svc.Metadata.Port,
@@ -77,12 +77,12 @@ func (r *ServerRegistry) FetchServers(ctx context.Context, req *pb.Empty) (*pb.F
 		serverList = append(serverList, &server)
 	}
 
-	return &pb.FetchServersResponse{
+	return &managerv1.FetchServersResponse{
 		Servers: serverList,
 	}, nil
 }
 
-func (r *ServerRegistry) FetchSpecificServer(ctx context.Context, req *pb.FetchSpecificServerRequest) (*pb.FetchSpecificServerResponse, error) {
+func (r *ServerRegistry) FetchSpecificServer(ctx context.Context, req *managerv1.FetchSpecificServerRequest) (*managerv1.FetchSpecificServerResponse, error) {
 	r.mu.RLock()
 	svc, ok := r.servers[req.GetAddr()]
 	r.mu.RUnlock()
@@ -117,8 +117,8 @@ func (r *ServerRegistry) FetchSpecificServer(ctx context.Context, req *pb.FetchS
 			return nil, fmt.Errorf("could not find server function definition for address %s", req.GetAddr())
 		}
 
-		return &pb.FetchSpecificServerResponse{
-			ServerDefinition: &pb.FetchServerDefinition{
+		return &managerv1.FetchSpecificServerResponse{
+			ServerDefinition: &managerv1.FetchServerDefinition{
 				Name:        svc.Metadata.GetServerName(),
 				Description: svc.Metadata.GetServerName(),
 				Addr:        req.GetAddr(),
@@ -144,7 +144,7 @@ func (r *ServerRegistry) UpdateHeartbeat(addr string) {
 	}
 }
 
-func SaveProtoFiles(in *pb.RegisterRequest) error {
+func SaveProtoFiles(in *managerv1.RegisterServerRequest) error {
 
 	tmpBase := os.TempDir()
 	dirPath := filepath.Join(
