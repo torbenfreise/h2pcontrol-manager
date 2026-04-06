@@ -5,18 +5,15 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"os"
-	"path/filepath"
 	"sync"
 	"time"
 
-	"h2pcontrol.manager/helper"
-	pb "h2pcontrol.manager/pb"
+	managerv1 "buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go/h2pcontrol/manager/v1"
 )
 
 type ServerEntry struct {
 	LastSeen  time.Time
-	Metadata  *pb.ServerDefinition
+	Metadata  *managerv1.ServerDefinition
 	Heartbeat chan struct{}
 }
 
@@ -31,15 +28,15 @@ func NewServerRegistry() *ServerRegistry {
 	}
 }
 
-func (r *ServerRegistry) RegisterServer(ctx context.Context, in *pb.RegisterRequest, addr string) (*pb.RegisterResponse, error) {
+func (r *ServerRegistry) RegisterServer(ctx context.Context, in *managerv1.RegisterServerRequest, addr string) (*managerv1.RegisterServerResponse, error) {
 
-	_, port, err := net.SplitHostPort(addr)
+	ip, port, err := net.SplitHostPort(addr)
 	if err != nil {
 		return nil, fmt.Errorf("invalid address format: %v", err)
 	}
 
-	// Create new address with server's IP and original port
-	newAddr := net.JoinHostPort(in.Server.Ip, port)
+	// Create new address with peer's IP and original port
+	newAddr := net.JoinHostPort(ip, port)
 
 	entry := &ServerEntry{
 		LastSeen:  time.Now(),
@@ -53,80 +50,32 @@ func (r *ServerRegistry) RegisterServer(ctx context.Context, in *pb.RegisterRequ
 	r.servers[newAddr] = entry
 	r.mu.Unlock()
 
-	log.Printf("Server connected: '%v' running '%v.%v'", newAddr, in.Server.GetServerName(), in.Server.GetVersion())
-	SaveProtoFiles(in)
+	log.Printf("Server connected: '%v' running '%v'", newAddr, in.Server.GetName())
 
-	return &pb.RegisterResponse{
+	return &managerv1.RegisterServerResponse{
 		Result: "Server registered successfully",
 	}, nil
 }
 
-func (r *ServerRegistry) FetchServers(ctx context.Context, req *pb.Empty) (*pb.FetchServersResponse, error) {
+func (r *ServerRegistry) FetchServers(ctx context.Context, req *managerv1.FetchServersRequest) (*managerv1.FetchServersResponse, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	var serverList []*pb.FetchServerDefinition
+	var serverList []*managerv1.FetchServerDefinition
 	for addr, svc := range r.servers {
-		// The port in addr is the port of the h2pcontrol server process, not of the running server
-		ip, _ := helper.SplitAddr(addr)
-		server := pb.FetchServerDefinition{
-			Name:        svc.Metadata.GetServerName(),
-			Description: svc.Metadata.GetServerName(),
-			Addr:        ip + ":" + svc.Metadata.Port,
+		// The port in addr is the port over which the manager is connected, not the service's open port.
+		ip, _, _ := net.SplitHostPort(addr)
+		server := managerv1.FetchServerDefinition{
+			Name:        svc.Metadata.GetName(),
+			Description: svc.Metadata.GetDescription(),
+			Addr:        ip + ":" + svc.Metadata.GetPort(),
 		}
 		serverList = append(serverList, &server)
 	}
 
-	return &pb.FetchServersResponse{
+	return &managerv1.FetchServersResponse{
 		Servers: serverList,
 	}, nil
-}
-
-func (r *ServerRegistry) FetchSpecificServer(ctx context.Context, req *pb.FetchSpecificServerRequest) (*pb.FetchSpecificServerResponse, error) {
-	r.mu.RLock()
-	svc, ok := r.servers[req.GetAddr()]
-	r.mu.RUnlock()
-	if !ok {
-		return nil, fmt.Errorf("server with addr %s not found", req.GetAddr())
-	}
-
-	if entry, ok := r.servers[req.GetAddr()]; ok {
-		tmpBase := os.TempDir()
-		proto_path := filepath.Join(
-			tmpBase,
-			"h2pcontrol_proto",
-			entry.Metadata.GetServerName(),
-			entry.Metadata.GetVersion(),
-		)
-
-		proto_files, err := os.ReadDir(proto_path)
-		if err != nil {
-			log.Fatal("Unable to read proto dir")
-		}
-
-		var proto_string string
-		for _, proto_file := range proto_files {
-			content, err := os.ReadFile(filepath.Join(proto_path, proto_file.Name()))
-			if err != nil {
-				return nil, fmt.Errorf("failed to read proto file %s: %v", proto_file.Name(), err)
-			}
-			proto_string += string(content)
-		}
-
-		if err != nil {
-			return nil, fmt.Errorf("could not find server function definition for address %s", req.GetAddr())
-		}
-
-		return &pb.FetchSpecificServerResponse{
-			ServerDefinition: &pb.FetchServerDefinition{
-				Name:        svc.Metadata.GetServerName(),
-				Description: svc.Metadata.GetServerName(),
-				Addr:        req.GetAddr(),
-			},
-			Proto: proto_string,
-		}, nil
-	}
-	return nil, fmt.Errorf("something went wrong fetching server %s", req.GetAddr())
 }
 
 func (r *ServerRegistry) RemoveServer(addr string) {
@@ -142,26 +91,4 @@ func (r *ServerRegistry) UpdateHeartbeat(addr string) {
 	if entry, ok := r.servers[addr]; ok {
 		entry.LastSeen = time.Now()
 	}
-}
-
-func SaveProtoFiles(in *pb.RegisterRequest) error {
-
-	tmpBase := os.TempDir()
-	dirPath := filepath.Join(
-		tmpBase,
-		"h2pcontrol_proto",
-		in.Server.GetServerName(),
-		in.Server.GetVersion(),
-	)
-
-	if err := os.MkdirAll(dirPath, 0755); err != nil {
-		return err
-	}
-
-	for _, file := range in.Server.ProtoFiles {
-		if err := os.WriteFile(filepath.Join(dirPath, file.Name), file.Content, 0644); err != nil {
-			return err
-		}
-	}
-	return nil
 }
