@@ -25,12 +25,7 @@ var (
 type server struct {
 	managerv1grpc.UnimplementedManagerServiceServer
 	sync.RWMutex
-	registry     *internal.ServerRegistry
-	stub_service *internal.StubService
-}
-
-func (s *server) GetStub(ctx context.Context, in *managerv1.GetStubRequest) (*managerv1.GetStubResponse, error) {
-	return s.stub_service.GetStub(ctx, in)
+	registry *internal.ServerRegistry
 }
 
 func (s *server) RegisterServer(ctx context.Context, in *managerv1.RegisterServerRequest) (*managerv1.RegisterServerResponse, error) {
@@ -41,10 +36,6 @@ func (s *server) RegisterServer(ctx context.Context, in *managerv1.RegisterServe
 
 func (s *server) FetchServers(ctx context.Context, in *managerv1.FetchServersRequest) (*managerv1.FetchServersResponse, error) {
 	return s.registry.FetchServers(ctx, in)
-}
-
-func (s *server) FetchSpecificServer(ctx context.Context, in *managerv1.FetchSpecificServerRequest) (*managerv1.FetchSpecificServerResponse, error) {
-	return s.registry.FetchSpecificServer(ctx, in)
 }
 
 func (s *server) Heartbeat(stream managerv1grpc.ManagerService_HeartbeatServer) error {
@@ -97,8 +88,7 @@ func RunServer() {
 	}
 
 	srv := &server{
-		registry:     internal.NewServerRegistry(),
-		stub_service: internal.NewStubService(),
+		registry: internal.NewServerRegistry(),
 	}
 
 	serverOpts := []grpc.ServerOption{
