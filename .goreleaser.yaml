@@ -6,7 +6,7 @@ before:
 
 builds:
   - binary: h2pcontrol
-    main: ./...
+    main: .
     env:
       - CGO_ENABLED=0
     goos:
