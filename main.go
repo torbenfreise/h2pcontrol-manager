@@ -1,9 +1,9 @@
 package main
 
 import (
-	"h2pcontrol.manager/grpc"
+	"h2pcontrol.manager/cmd"
 )
 
 func main() {
-	grpc.RunServer()
+	cmd.Execute()
 }
