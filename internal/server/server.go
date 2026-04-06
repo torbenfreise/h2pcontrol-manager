@@ -1,44 +1,41 @@
-package grpc
+package server
 
 import (
 	"context"
-	"flag"
+	"errors"
 	"fmt"
 	"log"
 	"net"
 	"sync"
 	"time"
 
-	"h2pcontrol.manager/internal"
+	"h2pcontrol.manager/internal/registry"
 
-	managerv1grpc "buf.build/gen/go/beyer-labs/h2pcontrol/grpc/go/h2pcontrol/manager/v1/managerv1grpc"
-	managerv1 "buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go/h2pcontrol/manager/v1"
+	managergrpc "buf.build/gen/go/beyer-labs/h2pcontrol/grpc/go/h2pcontrol/manager/v1/managerv1grpc"
+	managerpb "buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go/h2pcontrol/manager/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/peer"
 )
 
-var (
-	port = flag.Int("port", 50051, "The server port")
-)
-
 type server struct {
-	managerv1grpc.UnimplementedManagerServiceServer
+	managergrpc.UnimplementedManagerServiceServer
 	sync.RWMutex
-	registry *internal.ServerRegistry
+	registry   *registry.Registry
+	grpcServer *grpc.Server
 }
 
-func (s *server) RegisterServer(ctx context.Context, in *managerv1.RegisterServerRequest) (*managerv1.RegisterServerResponse, error) {
+func (s *server) Register(ctx context.Context, in *managerpb.RegisterRequest) (*managerpb.RegisterResponse, error) {
 	peerInfo, _ := peer.FromContext(ctx)
 	addr := peerInfo.Addr.String()
-	return s.registry.RegisterServer(ctx, in, addr)
+	return s.registry.RegisterService(ctx, in, addr)
 }
 
-func (s *server) FetchServers(ctx context.Context, in *managerv1.FetchServersRequest) (*managerv1.FetchServersResponse, error) {
-	return s.registry.FetchServers(ctx, in)
+func (s *server) List(ctx context.Context, in *managerpb.ListRequest) (*managerpb.ListResponse, error) {
+	return s.registry.List(ctx, in)
 }
 
-func (s *server) Heartbeat(stream managerv1grpc.ManagerService_HeartbeatServer) error {
+func (s *server) Heartbeat(stream grpc.BidiStreamingServer[managerpb.HeartbeatRequest, managerpb.HeartbeatResponse]) error {
 	peerInfo, _ := peer.FromContext(stream.Context())
 	addr := peerInfo.Addr.String()
 
@@ -50,7 +47,7 @@ func (s *server) Heartbeat(stream managerv1grpc.ManagerService_HeartbeatServer) 
 		for {
 			select {
 			case <-ticker.C:
-				pong := &managerv1.HeartbeatResponse{
+				pong := &managerpb.HeartbeatResponse{
 					Healthy:   true,
 					Timestamp: time.Now().Unix(),
 				}
@@ -69,7 +66,7 @@ func (s *server) Heartbeat(stream managerv1grpc.ManagerService_HeartbeatServer) 
 		ping, err := stream.Recv()
 		if err != nil {
 			log.Printf("Heartbeat stream closed from %v: %v", addr, err)
-			s.registry.RemoveServer(addr)
+			s.registry.RemoveService(addr)
 			close(done)
 			return nil
 		}
@@ -79,16 +76,15 @@ func (s *server) Heartbeat(stream managerv1grpc.ManagerService_HeartbeatServer) 
 	}
 }
 
-func RunServer() {
-	flag.Parse()
+func RunServer(port int) {
+	lis, err := net.Listen("tcp4", fmt.Sprintf(":%d", port))
 
-	lis, err := net.Listen("tcp4", fmt.Sprintf(":%d", *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
 	srv := &server{
-		registry: internal.NewServerRegistry(),
+		registry: registry.NewRegistry(),
 	}
 
 	serverOpts := []grpc.ServerOption{
@@ -99,10 +95,11 @@ func RunServer() {
 	}
 
 	s := grpc.NewServer(serverOpts...)
-	managerv1grpc.RegisterManagerServiceServer(s, srv)
+	srv.grpcServer = s
+	managergrpc.RegisterManagerServiceServer(s, srv)
 	log.Printf("server listening at %v", lis.Addr())
 
-	if err := s.Serve(lis); err != nil {
+	if err := s.Serve(lis); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
 		log.Fatalf("Failed to serve: %v", err)
 	}
 }
