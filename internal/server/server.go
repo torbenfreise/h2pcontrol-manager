@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/torbenfreise/h2pcontrol-manager/internal/registry"
+	"github.com/torbenfreise/h2pcontrol/internal/registry"
 
 	managergrpc "buf.build/gen/go/beyer-labs/h2pcontrol/grpc/go/h2pcontrol/manager/v1/managerv1grpc"
 	managerpb "buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go/h2pcontrol/manager/v1"

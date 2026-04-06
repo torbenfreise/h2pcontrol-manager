@@ -1,4 +1,4 @@
-module github.com/torbenfreise/h2pcontrol-manager
+module github.com/torbenfreise/h2pcontrol
 
 go 1.25.1
 
@@ -7,6 +7,7 @@ require (
 	buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go v1.36.11-20260406200022-e922f1864dd9.1
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
+	github.com/torbenfreise/h2pcontrol-manager v0.1.0
 	google.golang.org/grpc v1.80.0
 )
 
@@ -24,7 +25,7 @@ require (
 	golang.org/x/net v0.52.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/text v0.35.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260406154035-8fb7ec149431 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260406210006-6f92a3bedf2d // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )

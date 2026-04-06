@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/torbenfreise/h2pcontrol-manager/internal/server"
+	"github.com/torbenfreise/h2pcontrol/internal/server"
 )
 
 var startCmd = &cobra.Command{
