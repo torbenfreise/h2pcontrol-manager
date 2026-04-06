@@ -3,8 +3,8 @@ module h2pcontrol.manager
 go 1.25.0
 
 require (
-	buf.build/gen/go/beyer-labs/h2pcontrol/grpc/go v1.6.1-20260405222827-ce9a930e800e.1
-	buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go v1.36.11-20260405222827-ce9a930e800e.1
+	buf.build/gen/go/beyer-labs/h2pcontrol/grpc/go v1.6.1-20260406105320-6b21d2394c15.1
+	buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go v1.36.11-20260406105320-6b21d2394c15.1
 	google.golang.org/grpc v1.80.0
 )
 
