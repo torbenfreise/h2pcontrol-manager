@@ -1,6 +1,6 @@
 module h2pcontrol.manager
 
-go 1.26.1
+go 1.25.1
 
 require (
 	buf.build/gen/go/beyer-labs/h2pcontrol/grpc/go v1.6.1-20260406200022-e922f1864dd9.1
@@ -15,7 +15,6 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.3.0 // indirect
-	github.com/phayes/freeport v0.0.0-20220201140144-74d24b5ae9f5 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
