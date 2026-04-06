@@ -8,3 +8,6 @@ h2pcontrol.manager
 
 # OS
 .DS_Store
+
+# build
+dist/

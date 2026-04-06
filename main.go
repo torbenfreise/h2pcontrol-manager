@@ -1,7 +1,7 @@
 package main
 
 import (
-	"h2pcontrol.manager/cmd"
+	"github.com/torbenfreise/h2pcontrol-manager/cmd"
 )
 
 func main() {
