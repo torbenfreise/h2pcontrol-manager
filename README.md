@@ -1,8 +1,27 @@
 # h2pControl Manager
 
-The h2pControl Manager is the central registry service for H2PControl. It exposes a gRPC API that lets servers register themselves, keeps an up-to-date list of active servers through heartbeat streaming, and returns discoverable server endpoints to clients.
+The h2pControl Manager is the central service registry for H2PControl. This repository now provides a CLI application (`h2pcontrol`) that can:
+
+- Start the manager gRPC server.
+- Query and list currently registered services from a running manager.
 
 For detailed documentation, see the [h2pcontrol-manager-docs](./h2pcontrol-manager-docs) folder.
+
+## Quick usage
+
+Run the manager server:
+
+```bash
+go run . start --port 50051
+```
+
+List services from a running manager:
+
+```bash
+go run . list --manager 127.0.0.1:50051
+```
+
+You can also configure the manager address with the `H2PCONTROL_MANAGER` environment variable.
 
 ## Documentation
 
