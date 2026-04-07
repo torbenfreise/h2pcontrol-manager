@@ -47,10 +47,7 @@ func (s *server) Heartbeat(stream grpc.BidiStreamingServer[managerpb.HeartbeatRe
 		for {
 			select {
 			case <-ticker.C:
-				pong := &managerpb.HeartbeatResponse{
-					Healthy:   true,
-					Timestamp: time.Now().Unix(),
-				}
+				pong := &managerpb.HeartbeatResponse{}
 				if err := stream.Send(pong); err != nil {
 					log.Printf("Error sending heartbeat pong: %v", err)
 					close(done)
@@ -71,8 +68,8 @@ func (s *server) Heartbeat(stream grpc.BidiStreamingServer[managerpb.HeartbeatRe
 			return nil
 		}
 
-		s.registry.UpdateHeartbeat(addr)
-		log.Printf("Received heartbeat from %v at %v", addr, time.Unix(ping.Timestamp, 0))
+		s.registry.UpdateHeartbeat(addr, ping.Healthy)
+		log.Printf("Received heartbeat from %v at %v", addr, time.Now())
 	}
 }
 
