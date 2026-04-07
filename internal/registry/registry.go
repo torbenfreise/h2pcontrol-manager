@@ -9,12 +9,14 @@ import (
 	"time"
 
 	manager "buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go/h2pcontrol/manager/v1"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Entry struct {
-	LastSeen  time.Time
-	Metadata  *manager.ServiceDefinition
-	Heartbeat chan struct{}
+	Definition *manager.ServiceDefinition
+	LastSeen   time.Time
+	Healthy    bool
+	Heartbeat  chan struct{}
 }
 
 type Registry struct {
@@ -39,9 +41,9 @@ func (r *Registry) RegisterService(ctx context.Context, in *manager.RegisterRequ
 	newAddr := net.JoinHostPort(ip, port)
 
 	entry := &Entry{
-		LastSeen:  time.Now(),
-		Metadata:  in.Service,
-		Heartbeat: make(chan struct{}),
+		LastSeen:   time.Now(),
+		Definition: in.Service,
+		Heartbeat:  make(chan struct{}),
 	}
 
 	log.Printf("Service wants to connect")
@@ -64,9 +66,10 @@ func (r *Registry) List(ctx context.Context, req *manager.ListRequest) (*manager
 		// The port in addr is the port over which the manager is connected, not the service's open port.
 		ip, _, _ := net.SplitHostPort(addr)
 		server := manager.ServiceInfo{
-			Name:        svc.Metadata.GetName(),
-			Description: svc.Metadata.GetDescription(),
-			Addr:        ip + ":" + svc.Metadata.GetPort(),
+			Definition: svc.Definition,
+			Host:       ip,
+			Healthy:    svc.Healthy,
+			LastSeen:   timestamppb.New(svc.LastSeen),
 		}
 		serverList = append(serverList, &server)
 	}
@@ -83,10 +86,11 @@ func (r *Registry) RemoveService(addr string) {
 
 }
 
-func (r *Registry) UpdateHeartbeat(addr string) {
+func (r *Registry) UpdateHeartbeat(addr string, healthy bool) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if entry, ok := r.services[addr]; ok {
 		entry.LastSeen = time.Now()
+		entry.Healthy = healthy
 	}
 }

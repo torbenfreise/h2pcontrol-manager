@@ -3,8 +3,8 @@ module github.com/torbenfreise/h2pcontrol
 go 1.25.1
 
 require (
-	buf.build/gen/go/beyer-labs/h2pcontrol/grpc/go v1.6.1-20260407215636-5ca14a73b0a1.1
-	buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go v1.36.11-20260407215636-5ca14a73b0a1.1
+	buf.build/gen/go/beyer-labs/h2pcontrol/grpc/go v1.6.1-20260407223931-2b17341dc6b9.1
+	buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go v1.36.11-20260407223931-2b17341dc6b9.1
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	google.golang.org/grpc v1.80.0
