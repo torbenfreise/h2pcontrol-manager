@@ -1,10 +1,7 @@
 package registry
 
 import (
-	"context"
-	"fmt"
 	"log"
-	"net"
 	"sync"
 	"time"
 
@@ -30,15 +27,7 @@ func NewRegistry() *Registry {
 	}
 }
 
-func (r *Registry) RegisterService(ctx context.Context, in *manager.RegisterRequest, addr string) (*manager.RegisterResponse, error) {
-
-	ip, port, err := net.SplitHostPort(addr)
-	if err != nil {
-		return nil, fmt.Errorf("invalid address format: %v", err)
-	}
-
-	// Create new address with peer's IP and original port
-	newAddr := net.JoinHostPort(ip, port)
+func (r *Registry) RegisterService(in *manager.RegisterRequest, addr string) (*manager.RegisterResponse, error) {
 
 	entry := &Entry{
 		LastSeen:   time.Now(),
@@ -46,28 +35,23 @@ func (r *Registry) RegisterService(ctx context.Context, in *manager.RegisterRequ
 		Heartbeat:  make(chan struct{}),
 	}
 
-	log.Printf("Service wants to connect")
-
 	r.mu.Lock()
-	r.services[newAddr] = entry
+	r.services[addr] = entry
 	r.mu.Unlock()
 
-	log.Printf("Service connected: '%v' running '%v'", newAddr, in.Service.GetName())
+	log.Printf("Service connected: '%v' ", in.Service.GetName())
 
 	return &manager.RegisterResponse{}, nil
 }
 
-func (r *Registry) List(ctx context.Context, req *manager.ListRequest) (*manager.ListResponse, error) {
+func (r *Registry) List() (*manager.ListResponse, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
 	var serverList []*manager.ServiceInfo
-	for addr, svc := range r.services {
-		// The port in addr is the port over which the manager is connected, not the service's open port.
-		ip, _, _ := net.SplitHostPort(addr)
+	for _, svc := range r.services {
 		server := manager.ServiceInfo{
 			Definition: svc.Definition,
-			Host:       ip,
 			Healthy:    svc.Healthy,
 			LastSeen:   timestamppb.New(svc.LastSeen),
 		}

@@ -27,12 +27,11 @@ type server struct {
 
 func (s *server) Register(ctx context.Context, in *managerpb.RegisterRequest) (*managerpb.RegisterResponse, error) {
 	peerInfo, _ := peer.FromContext(ctx)
-	addr := peerInfo.Addr.String()
-	return s.registry.RegisterService(ctx, in, addr)
+	return s.registry.RegisterService(in, peerInfo.Addr.String())
 }
 
 func (s *server) List(ctx context.Context, in *managerpb.ListRequest) (*managerpb.ListResponse, error) {
-	return s.registry.List(ctx, in)
+	return s.registry.List()
 }
 
 func (s *server) Heartbeat(stream grpc.BidiStreamingServer[managerpb.HeartbeatRequest, managerpb.HeartbeatResponse]) error {
