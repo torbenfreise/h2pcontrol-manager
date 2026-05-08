@@ -39,11 +39,14 @@ func PrettyPrintServices(resp *managerpb.ListResponse) {
 	}
 	fmt.Println("Registered Services:")
 	for _, server := range resp.Services {
+		definition := server.GetDefinition()
+		lastSeen := server.GetLastSeen().AsTime().Format("2006-01-02 15:04:05")
 		status := map[bool]string{true: "healthy", false: "unhealthy"}[server.GetHealthy()]
-		fmt.Printf("  %s\n", server.GetDefinition().GetName())
-		fmt.Printf("    Description : %s\n", server.GetDefinition().GetDescription())
-		fmt.Printf("    Address     : %s:%d\n", server.GetHost(), server.GetDefinition().GetPort())
-		fmt.Printf("    Last seen   : %s\n", server.GetLastSeen().AsTime().Format("2006-01-02 15:04:05"))
+
+		fmt.Printf("  %s\n", definition.GetName())
+		fmt.Printf("    Description : %s\n", definition.GetDescription())
+		fmt.Printf("    Address     : %s\n", definition.GetAddress())
+		fmt.Printf("    Last seen   : %s\n", lastSeen)
 		fmt.Printf("    Status      : %s\n", status)
 		fmt.Println()
 	}
