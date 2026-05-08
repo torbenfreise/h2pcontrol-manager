@@ -21,9 +21,9 @@ const (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "h2pcontrol",
-	Short: "h2pcontrol is a tool for managing grpc communication between different services",
-	Long:  "h2pcontrol is a tool for managing grpc communication between different services. This is the h2pcontrol client which allows you to register your service and consume other services. ",
+	Use:   "h2pmanager",
+	Short: "h2pmanager is the service registry for the h2pcontrol ecosystem",
+	Long:  "h2pmanager is the service registry for the h2pcontrol ecosystem. It tracks service registrations and maintains liveness via bidirectional heartbeat streams.",
 }
 
 func init() {}

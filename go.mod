@@ -1,4 +1,4 @@
-module github.com/torbenfreise/h2pcontrol
+module github.com/torbenfreise/h2pcontrol-manager
 
 go 1.25.1
 
