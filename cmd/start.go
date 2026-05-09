@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/torbenfreise/h2pcontrol/internal/server"
+	"github.com/torbenfreise/h2pcontrol-manager/internal/server"
 )
 
 var startCmd = &cobra.Command{
@@ -15,6 +15,6 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
-	startCmd.Flags().Int("port", 50051, "Port to listen on")
+	startCmd.Flags().IntP("port", "p", 50051, "Port to listen on")
 	rootCmd.AddCommand(startCmd)
 }
