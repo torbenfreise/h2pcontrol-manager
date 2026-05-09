@@ -42,18 +42,18 @@ var list = &cobra.Command{
 }
 
 func init() {
-	viper.SetDefault("manager", "127.0.0.1:50051")
-	viper.SetEnvPrefix("H2PCONTROL")
+	viper.SetDefault("address", "127.0.0.1:50051")
+	viper.SetEnvPrefix("H2PMANAGER")
 	viper.AutomaticEnv()
-	list.Flags().StringP("manager", "m", viper.GetString("manager"), "Address of the h2pcontrol manager to query")
-	if err := viper.BindPFlag("manager", list.Flags().Lookup("manager")); err != nil {
+	list.Flags().StringP("address", "a", viper.GetString("address"), "Address of the h2pcontrol manager to query")
+	if err := viper.BindPFlag("address", list.Flags().Lookup("address")); err != nil {
 		log.Fatalf("Failed to bind viper flag: %v", err)
 	}
 	rootCmd.AddCommand(list)
 }
 
 func clientPreRun(cmd *cobra.Command, _ []string) {
-	managerAddr, _ := cmd.Flags().GetString("manager")
+	managerAddr, _ := cmd.Flags().GetString("address")
 	conn, err := grpc.NewClient(managerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Failed to initialise grpc client: %v", err)
