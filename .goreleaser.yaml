@@ -5,8 +5,8 @@ before:
     - go mod tidy
 
 builds:
-  - binary: h2pcontrol
-    main: .
+  - binary: h2pmanager
+    main: ./cmd/h2pmanager
     env:
       - CGO_ENABLED=0
     goos:
