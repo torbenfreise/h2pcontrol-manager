@@ -13,7 +13,7 @@ For detailed documentation, see the [h2pcontrol-manager-docs](./h2pcontrol-manag
 [Go](https://go.dev/dl/) must be installed. Then run:
 
 ```bash
-go install github.com/torbenfreise/h2pmanager-manager/cmd/h2pmanager@latest
+go install github.com/torbenfreise/h2pcontrol-manager/cmd/h2pmanager@latest
 ```
 
 This places the `h2pmanager` binary in your Go bin directory (typically `~/go/bin`). Make sure it is on your `PATH`:
@@ -29,6 +29,7 @@ export PATH="$HOME/go/bin:$PATH"
 ```
 
 Then reload your shell (`source ~/.bashrc` or `source ~/.zshrc`) and `h2pmanager` will be available globally.
+
 ## Quick usage
 
 Start the manager listening on the supplied port:
@@ -42,7 +43,7 @@ List services from a running manager:
 h2pmanager list --address 127.0.0.1:50051
 ```
 
-You can also configure the manager address with the `H2PMANAGERL_ADDRESS` environment variable.
+You can also configure the manager address with the `H2PMANAGER_ADDRESS` environment variable.
 
 ## Documentation
 
