@@ -13,7 +13,7 @@ For detailed documentation, see the [h2pcontrol-manager-docs](./h2pcontrol-manag
 [Go](https://go.dev/dl/) must be installed. Then run:
 
 ```bash
-go install github.com/torbenfreise/h2pcontrol@latest
+go install github.com/torbenfreise/h2pcontrol-manager@latest
 ```
 
 This places the `h2pcontrol` binary in your Go bin directory (typically `~/go/bin`). Make sure it is on your `PATH`:
