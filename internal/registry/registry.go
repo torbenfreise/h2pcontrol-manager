@@ -28,10 +28,9 @@ func NewRegistry() *Registry {
 }
 
 func (r *Registry) RegisterService(in *manager.RegisterRequest, addr string) (*manager.RegisterResponse, error) {
-
 	entry := &Entry{
 		LastSeen:   time.Now(),
-		Definition: in.Service,
+		Definition: in.GetService(),
 		Heartbeat:  make(chan struct{}),
 	}
 
@@ -39,7 +38,7 @@ func (r *Registry) RegisterService(in *manager.RegisterRequest, addr string) (*m
 	r.services[addr] = entry
 	r.mu.Unlock()
 
-	log.Printf("Service connected: '%v' ", in.Service.GetName())
+	log.Printf("Service connected: '%v' ", in.GetService().GetName())
 
 	return &manager.RegisterResponse{}, nil
 }
@@ -67,7 +66,6 @@ func (r *Registry) RemoveService(addr string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	delete(r.services, addr)
-
 }
 
 func (r *Registry) UpdateHeartbeat(addr string, healthy bool) {

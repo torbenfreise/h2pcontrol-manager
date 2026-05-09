@@ -1,6 +1,18 @@
 version: "2"
 
-
 formatters:
   enable:
     - gofmt
+
+linters:
+  enable:
+    - gocritic
+    - exhaustive
+    - godot
+    - errorlint
+    - forcetypeassert
+    - unparam
+    - whitespace
+    - recvcheck
+    - misspell
+    - protogetter  # enforce proto getter usage over direct field access

@@ -30,7 +30,7 @@ func (s *server) Register(ctx context.Context, in *managerpb.RegisterRequest) (*
 	return s.registry.RegisterService(in, peerInfo.Addr.String())
 }
 
-func (s *server) List(ctx context.Context, in *managerpb.ListRequest) (*managerpb.ListResponse, error) {
+func (s *server) List(_ context.Context, _ *managerpb.ListRequest) (*managerpb.ListResponse, error) {
 	return s.registry.List()
 }
 
@@ -67,7 +67,7 @@ func (s *server) Heartbeat(stream grpc.BidiStreamingServer[managerpb.HeartbeatRe
 			return nil
 		}
 
-		s.registry.UpdateHeartbeat(addr, ping.Healthy)
+		s.registry.UpdateHeartbeat(addr, ping.GetHealthy())
 		log.Printf("Received heartbeat from %v at %v", addr, time.Now())
 	}
 }
