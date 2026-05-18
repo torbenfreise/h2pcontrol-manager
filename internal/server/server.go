@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"sync"
 	"time"
 
 	"github.com/torbenfreise/h2pcontrol-manager/internal/registry"
@@ -20,7 +19,6 @@ import (
 
 type server struct {
 	managergrpc.UnimplementedManagerServiceServer
-	sync.RWMutex
 	registry   *registry.Registry
 	grpcServer *grpc.Server
 }
@@ -32,6 +30,34 @@ func (s *server) Register(ctx context.Context, in *managerpb.RegisterRequest) (*
 
 func (s *server) List(_ context.Context, _ *managerpb.ListRequest) (*managerpb.ListResponse, error) {
 	return s.registry.List()
+}
+
+func (s *server) Watch(_ *managerpb.WatchRequest, stream grpc.ServerStreamingServer[managerpb.WatchResponse]) error {
+	id, ch := s.registry.Subscribe()
+	defer s.registry.Unsubscribe(id)
+
+	send := func() error {
+		resp, err := s.registry.List()
+		if err != nil {
+			return err
+		}
+		return stream.Send(&managerpb.WatchResponse{Services: resp.GetServices()})
+	}
+
+	if err := send(); err != nil {
+		return err
+	}
+
+	for {
+		select {
+		case <-stream.Context().Done():
+			return nil
+		case <-ch:
+			if err := send(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 func (s *server) Heartbeat(stream grpc.BidiStreamingServer[managerpb.HeartbeatRequest, managerpb.HeartbeatResponse]) error {
