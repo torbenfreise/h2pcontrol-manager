@@ -1,13 +1,14 @@
 package cmd
 
 import (
-	managergrpc "buf.build/gen/go/beyer-labs/h2pcontrol/grpc/go/h2pcontrol/manager/v1/managerv1grpc"
-	managerpb "buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go/h2pcontrol/manager/v1"
 	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
 	"io"
 	"log"
+
+	managergrpc "buf.build/gen/go/beyer-labs/h2pcontrol/grpc/go/h2pcontrol/manager/v1/managerv1grpc"
+	managerpb "buf.build/gen/go/beyer-labs/h2pcontrol/protocolbuffers/go/h2pcontrol/manager/v1"
+	"github.com/spf13/cobra"
 )
 
 var watch = &cobra.Command{
@@ -37,7 +38,7 @@ var watch = &cobra.Command{
 				log.Fatalf("watch stream error: %v", err)
 			}
 			fmt.Print("\033[H\033[2J")
-			PrettyPrintServices(&managerpb.ListResponse{Services: resp.GetServices()})
+			printServices(resp.GetServices())
 		}
 	},
 }
