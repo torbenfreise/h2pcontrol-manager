@@ -13,7 +13,6 @@ type Entry struct {
 	Definition *manager.ServiceDefinition
 	LastSeen   time.Time
 	Healthy    bool
-	Heartbeat  chan struct{}
 }
 
 type Registry struct {
@@ -63,7 +62,6 @@ func (r *Registry) RegisterService(in *manager.RegisterRequest, addr string) (*m
 	entry := &Entry{
 		LastSeen:   time.Now(),
 		Definition: in.GetService(),
-		Heartbeat:  make(chan struct{}),
 	}
 
 	r.mu.Lock()
@@ -107,7 +105,9 @@ func (r *Registry) UpdateHeartbeat(addr string, healthy bool) {
 	defer r.mu.Unlock()
 	if entry, ok := r.services[addr]; ok {
 		entry.LastSeen = time.Now()
+		if entry.Healthy != healthy {
+			r.notify()
+		}
 		entry.Healthy = healthy
-		r.notify()
 	}
 }

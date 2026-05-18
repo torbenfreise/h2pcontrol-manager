@@ -45,11 +45,15 @@ func init() {
 	viper.SetDefault("address", "127.0.0.1:50051")
 	viper.SetEnvPrefix("H2PMANAGER")
 	viper.AutomaticEnv()
-	list.Flags().StringP("address", "a", viper.GetString("address"), "Address of the h2pcontrol manager to query")
-	if err := viper.BindPFlag("address", list.Flags().Lookup("address")); err != nil {
+	registerClientFlags(list)
+	rootCmd.AddCommand(list)
+}
+
+func registerClientFlags(cmd *cobra.Command) {
+	cmd.Flags().StringP("address", "a", viper.GetString("address"), "Address of the h2pcontrol manager to query")
+	if err := viper.BindPFlag("address", cmd.Flags().Lookup("address")); err != nil {
 		log.Fatalf("Failed to bind viper flag: %v", err)
 	}
-	rootCmd.AddCommand(list)
 }
 
 func clientPreRun(cmd *cobra.Command, _ []string) {

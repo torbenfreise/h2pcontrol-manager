@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"sync"
 	"time"
 
 	"github.com/torbenfreise/h2pcontrol-manager/internal/registry"
@@ -20,7 +19,6 @@ import (
 
 type server struct {
 	managergrpc.UnimplementedManagerServiceServer
-	sync.RWMutex
 	registry   *registry.Registry
 	grpcServer *grpc.Server
 }
